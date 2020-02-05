@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Game of Life</title></head>
+    <body>
+        <canvas id="can0" style="border: 2px solid black;" width="1080" height="520" onclick="fun()"></canvas>
+        <br>
+        <h1 style="font-family: sans-serif">Conway's Game of Life</h1>
+        <br>
+        <button onclick="draw()">Next Generation</button>
+        <br>
+        <br>
+        <button onclick="fastForw()">Start / Stop</button>
+        
+        <script>
+        const c0 = document.getElementById("can0");
+        const ctx = c0.getContext("2d");
+        
+        let arr = [];
+        let arrLive = [];
+        
+        function iter(array, obitu) {
+            for(let i = 0; i < array.length; i++) {
+                let pix = array[i];
+                for(let j = 1; j < pix.length; j++) {
+                    if(obitu[i][j] === true) ctx.fillStyle = "black";
+                    else ctx.fillStyle = "white";
+                    ctx.fillRect(pix[j], pix[0], 20, 20);
+                }
+            }
+        }
+        
+        for(let i = 0; i < c0.height; i += 20) {
+            let rows = [i];
+            let rowLive = [1];
+            
+            for(let j = 0; j < c0.width; j += 20) {
+                rows.push(j);
+                rowLive.push(Math.random() >= .7 ? true : false);
+            }
+            
+            arr.push(rows);
+            arrLive.push(rowLive);
+        }
+        
+        iter(arr, arrLive);
+        
+        
+        function nextGen(array) {
+            let newGen = [];
+            
+            for(let i = 0; i < array.length; i++) {
+                let row = [1];
+                for(let j = 1; j < array[i].length; j++) {
+                    let sum = 0;
+                    let quesLiv = false;
+                    
+                    for(let k = -1; k < 2; k++) {
+                        if(i + k < 0 || i + k >= array.length) continue;
+                        for(let l = -1; l < 2; l++) {
+                            if(j + l < 0 || j + l >= array[i].length) continue;
+                            if(k == 0 && l == 0) {
+                                if(array[i][j] === true) quesLiv = true;
+                                continue;
+                            }
+                            if(array[i + k][j + l] === true) sum++;
+                        }
+                    }
+                    
+                    row.push(((sum == 2 && quesLiv) || sum == 3) ? true : false);
+                }
+                newGen.push(row);
+            }
+            
+            arrLive = newGen;
+        }
+        
+        let boolean = false;
+        let inter;
+        function fastForw() {
+            if(boolean == false) {
+                boolean = true;
+                inter = setInterval(draw, 1000 / 10);
+            } else {
+                boolean = false;
+                clearInterval(inter);
+            }
+        }
+        
+        function draw() {
+            nextGen(arrLive);
+            iter(arr, arrLive);
+        }
+        
+        function fun() {
+            arrLive[Math.round((event.clientY - 11) / 20)][Math.round((event.clientX - 11) / 20)] = !arrLive[Math.round((event.clientY - 11) / 20)][Math.round((event.clientX - 11) / 20)];
+            iter(arr, arrLive);
+        }
+        </script>
+    </body>
+</html>
